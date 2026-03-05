@@ -14,7 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      reports: {
+        Row: {
+          analysis_output: Json
+          competitor_name: string
+          competitor_url: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          analysis_output?: Json
+          competitor_name?: string
+          competitor_url: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          analysis_output?: Json
+          competitor_name?: string
+          competitor_url?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
