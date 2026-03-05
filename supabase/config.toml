@@ -1,1 +1,4 @@
 project_id = "glumyfsuhvkzyddwqlys"
+
+[functions.analyze-competitor]
+verify_jwt = false
