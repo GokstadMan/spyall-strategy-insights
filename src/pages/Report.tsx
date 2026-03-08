@@ -99,39 +99,158 @@ const Report = () => {
     if (!report) return;
     const doc = new jsPDF();
     const a = report.analysis_output;
+    const pageW = doc.internal.pageSize.getWidth();
+    const margin = 16;
+    const contentW = pageW - margin * 2;
     let y = 20;
-    const addLine = (text: string, size = 10) => {
-      if (y > 270) { doc.addPage(); y = 20; }
-      doc.setFontSize(size);
-      const lines = doc.splitTextToSize(text, 170);
-      doc.text(lines, 20, y);
-      y += lines.length * (size * 0.5) + 4;
+
+    const checkPage = (needed = 20) => {
+      if (y + needed > 280) { doc.addPage(); y = 20; }
     };
 
-    addLine(`SpyAll Report: ${report.competitor_name}`, 18);
-    addLine(`URL: ${report.competitor_url}`, 10);
-    addLine(`Date: ${new Date(report.created_at).toLocaleDateString()}`, 10);
-    y += 8;
-    addLine("Company Overview", 14);
-    addLine(a.companyOverview.description);
-    addLine(`Category: ${a.companyOverview.category}`);
-    addLine(`Target Market: ${a.companyOverview.targetMarket}`);
-    addLine(`Business Model: ${a.companyOverview.businessModel}`);
-    y += 6;
-    addLine("Ideal Customer Profile", 14);
-    addLine(`Company Size: ${a.icp.companySize}`);
-    addLine(`Industry: ${a.icp.targetIndustry}`);
-    addLine(`Persona: ${a.icp.userPersona}`);
-    addLine(`Use Cases: ${a.icp.useCases.join(", ")}`);
-    y += 6;
-    addLine("Strengths", 14);
-    a.strengths.forEach(s => addLine(`• ${s}`));
-    y += 6;
-    addLine("Weaknesses", 14);
-    a.weaknesses.forEach(w => addLine(`• ${w}`));
-    y += 6;
-    addLine("Strategic Insights", 14);
-    a.strategicInsights.forEach(s => addLine(`• ${s}`));
+    const drawSectionHeader = (title: string) => {
+      checkPage(24);
+      y += 6;
+      doc.setFillColor(8, 32, 68); // navy
+      doc.roundedRect(margin, y, contentW, 10, 2, 2, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text(title, margin + 4, y + 7);
+      doc.setTextColor(30, 30, 30);
+      y += 16;
+    };
+
+    const addLabel = (label: string) => {
+      checkPage();
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(120, 120, 120);
+      doc.text(label.toUpperCase(), margin + 2, y);
+      y += 4;
+    };
+
+    const addValue = (text: string) => {
+      checkPage();
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(30, 30, 30);
+      const lines = doc.splitTextToSize(text, contentW - 4);
+      doc.text(lines, margin + 2, y);
+      y += lines.length * 4.5 + 3;
+    };
+
+    const addInfoRow = (label: string, value: string) => {
+      addLabel(label);
+      addValue(value);
+    };
+
+    const addBullet = (text: string, symbol = "•") => {
+      checkPage();
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(30, 30, 30);
+      doc.text(symbol, margin + 2, y);
+      const lines = doc.splitTextToSize(text, contentW - 12);
+      doc.text(lines, margin + 8, y);
+      y += lines.length * 4.5 + 2;
+    };
+
+    const addTags = (items: string[]) => {
+      checkPage();
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      let x = margin + 2;
+      items.forEach(item => {
+        const w = doc.getTextWidth(item) + 8;
+        if (x + w > pageW - margin) { x = margin + 2; y += 8; checkPage(); }
+        doc.setFillColor(230, 235, 240);
+        doc.roundedRect(x, y - 4, w, 7, 1.5, 1.5, "F");
+        doc.setTextColor(50, 50, 50);
+        doc.text(item, x + 4, y);
+        x += w + 3;
+      });
+      y += 10;
+    };
+
+    // Title block
+    doc.setFillColor(8, 32, 68);
+    doc.rect(0, 0, pageW, 40, "F");
+    doc.setTextColor(32, 184, 162); // teal accent
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.text("SpyAll", margin, 18);
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(16);
+    doc.text(report.competitor_name, margin, 28);
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(180, 200, 220);
+    doc.text(`${report.competitor_url}  •  ${new Date(report.created_at).toLocaleDateString()}`, margin, 36);
+    y = 50;
+
+    // Company Overview
+    drawSectionHeader("Company Overview");
+    addValue(a.companyOverview.description);
+    addInfoRow("Category", a.companyOverview.category);
+    addInfoRow("Target Market", a.companyOverview.targetMarket);
+    addInfoRow("Business Model", a.companyOverview.businessModel);
+
+    // ICP
+    drawSectionHeader("Ideal Customer Profile");
+    addInfoRow("Company Size", a.icp.companySize);
+    addInfoRow("Target Industry", a.icp.targetIndustry);
+    addInfoRow("User Persona", a.icp.userPersona);
+    addLabel("Use Cases");
+    addTags(a.icp.useCases);
+
+    // Product Offering
+    drawSectionHeader("Product Offering");
+    addLabel("Key Features");
+    addTags(a.productOffering.features);
+    if (a.productOffering.modules?.length > 0) {
+      addLabel("Modules");
+      addTags(a.productOffering.modules);
+    }
+    addLabel("Value Propositions");
+    a.productOffering.valuePropositions.forEach(vp => addBullet(vp));
+
+    // Pricing Strategy
+    drawSectionHeader("Pricing Strategy");
+    addInfoRow("Pricing Model", a.pricingStrategy.model);
+    addInfoRow("Free Plan", a.pricingStrategy.freePlan);
+    addInfoRow("Enterprise", a.pricingStrategy.enterprise);
+    if (a.pricingStrategy.tiers?.length > 0) {
+      addLabel("Tiers");
+      addTags(a.pricingStrategy.tiers);
+    }
+    if (a.pricingStrategy.note) {
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "italic");
+      doc.setTextColor(120, 120, 120);
+      const noteLines = doc.splitTextToSize(a.pricingStrategy.note, contentW - 4);
+      checkPage();
+      doc.text(noteLines, margin + 2, y);
+      y += noteLines.length * 4 + 4;
+    }
+
+    // Messaging & Positioning
+    drawSectionHeader("Messaging & Positioning");
+    addInfoRow("Headline", a.messaging.headline);
+    addInfoRow("Core Value Proposition", a.messaging.valueProposition);
+    addInfoRow("Positioning", a.messaging.positioning);
+
+    // Strengths
+    drawSectionHeader("Strengths");
+    a.strengths.forEach(s => addBullet(s, "✓"));
+
+    // Weaknesses
+    drawSectionHeader("Weaknesses");
+    a.weaknesses.forEach(w => addBullet(w, "✗"));
+
+    // Strategic Insights
+    drawSectionHeader("Strategic Insights");
+    a.strategicInsights.forEach((s, i) => addBullet(s, `${i + 1}.`));
 
     doc.save(`SpyAll-${report.competitor_name}.pdf`);
   };
