@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Download, ArrowLeft, Building2, Target, Package, DollarSign, MessageSquare, TrendingUp, TrendingDown, Lightbulb } from "lucide-react";
+import { ShareReportDialog } from "@/components/ShareReportDialog";
 import { motion } from "framer-motion";
 import jsPDF from "jspdf";
 
