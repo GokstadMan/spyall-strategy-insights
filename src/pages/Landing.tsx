@@ -42,9 +42,15 @@ const Landing = () => {
 
       {/* Hero Section - Dark */}
       <section className="section-dark min-h-[90vh] flex items-center">
-        {/* Cosmic glow orbs */}
-        <div className="cosmic-orb cosmic-orb-blue w-[600px] h-[600px] top-[-200px] left-1/2 -translate-x-1/2 animate-glow-pulse" />
-        <div className="cosmic-orb cosmic-orb-cyan w-[400px] h-[400px] top-[100px] right-[-100px] animate-float" />
+        {/* Cosmic glow image */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1200px] pointer-events-none z-0">
+          <img 
+            src={cosmicGlow} 
+            alt="" 
+            className="w-full h-auto opacity-70 mix-blend-screen"
+            aria-hidden="true"
+          />
+        </div>
         
         <div className="container mx-auto px-4 py-20 relative z-10">
           <motion.div
