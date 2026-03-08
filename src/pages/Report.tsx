@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Download, ArrowLeft, Building2, Target, Package, DollarSign, MessageSquare, TrendingUp, TrendingDown, Lightbulb } from "lucide-react";
+import { ShareReportDialog } from "@/components/ShareReportDialog";
 import { motion } from "framer-motion";
 import jsPDF from "jspdf";
 
@@ -71,11 +72,11 @@ const Report = () => {
   useEffect(() => {
     if (!user || !id) return;
     const fetch = async () => {
+      // Try own report first, then shared
       const { data } = await supabase
         .from("reports")
         .select("*")
         .eq("id", id)
-        .eq("user_id", user.id)
         .single();
       if (data) {
         const output = typeof data.analysis_output === "string"
@@ -172,9 +173,14 @@ const Report = () => {
             <h1 className="font-display text-3xl font-bold text-foreground">{report.competitor_name}</h1>
             <p className="text-sm text-muted-foreground mt-1">{report.competitor_url} • {new Date(report.created_at).toLocaleDateString()}</p>
           </div>
-          <Button variant="outline" onClick={exportPdf}>
-            <Download className="w-4 h-4 mr-2" /> Download PDF
-          </Button>
+          <div className="flex items-center gap-2">
+            {user && report && (
+              <ShareReportDialog reportId={report.id} reportName={report.competitor_name} />
+            )}
+            <Button variant="outline" onClick={exportPdf}>
+              <Download className="w-4 h-4 mr-2" /> Download PDF
+            </Button>
+          </div>
         </div>
 
         {/* Report Sections */}
