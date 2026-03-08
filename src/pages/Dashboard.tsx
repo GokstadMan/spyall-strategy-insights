@@ -116,8 +116,9 @@ const Dashboard = () => {
                       <p className="text-sm text-muted-foreground truncate mt-1">{report.competitor_url}</p>
                     </div>
                     <AlertDialog>
-                      <AlertDialogTrigger asChild onClick={(e) => e.stopPropagation()}>
+                      <AlertDialogTrigger asChild>
                         <button
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                           className="p-1 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors shrink-0 ml-2 mt-0.5"
                           title="Delete report"
                         >
