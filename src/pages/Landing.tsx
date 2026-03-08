@@ -81,6 +81,22 @@ const Landing = () => {
               </Button>
             </div>
           </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="mt-16 max-w-4xl mx-auto"
+          >
+            <div className="rounded-xl overflow-hidden border border-accent/20 shadow-[0_0_60px_-15px_hsl(var(--accent)/0.3)]">
+              <img
+                src={heroImage}
+                alt="SpyAll competitive intelligence dashboard preview"
+                className="w-full h-auto"
+                loading="lazy"
+              />
+            </div>
+          </motion.div>
         </div>
       </section>
 
