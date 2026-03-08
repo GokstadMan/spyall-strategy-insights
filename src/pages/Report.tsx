@@ -32,27 +32,27 @@ const SectionCard = ({ icon: Icon, title, children, index }: { icon: any; title:
     initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: 0.1 + index * 0.05 }}
-    className="glass-card rounded-xl p-6"
+    className="feature-card"
   >
-    <div className="flex items-center gap-3 mb-4">
-      <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center">
-        <Icon className="w-4.5 h-4.5 text-accent" />
+    <div className="flex items-center gap-3 mb-5">
+      <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+        <Icon className="w-5 h-5 text-accent" />
       </div>
-      <h2 className="font-display text-lg font-semibold text-foreground">{title}</h2>
+      <h2 className="text-lg font-semibold text-foreground">{title}</h2>
     </div>
     {children}
   </motion.div>
 );
 
 const InfoRow = ({ label, value }: { label: string; value: string }) => (
-  <div className="py-2 border-b border-border last:border-0">
-    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</span>
-    <p className="text-sm text-foreground mt-0.5">{value}</p>
+  <div className="py-3 border-b border-border last:border-0">
+    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
+    <p className="text-sm text-foreground mt-1">{value}</p>
   </div>
 );
 
 const Tag = ({ children }: { children: string }) => (
-  <span className="inline-block px-2.5 py-1 rounded-md bg-secondary text-secondary-foreground text-xs font-medium">
+  <span className="inline-block px-3 py-1.5 rounded-lg bg-secondary text-secondary-foreground text-xs font-medium">
     {children}
   </span>
 );
@@ -140,7 +140,7 @@ const Report = () => {
       <div className="min-h-screen bg-background">
         <SpyNavbar />
         <div className="container mx-auto px-4 py-16 text-center">
-          <div className="w-8 h-8 rounded-full border-2 border-accent border-t-transparent animate-spin mx-auto" />
+          <div className="w-10 h-10 rounded-full border-2 border-accent border-t-transparent animate-spin mx-auto" />
         </div>
       </div>
     );
@@ -164,15 +164,15 @@ const Report = () => {
       <SpyNavbar />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-10">
           <div>
-            <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="mb-2">
-              <ArrowLeft className="w-4 h-4 mr-1" /> Back
+            <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="mb-3">
+              <ArrowLeft className="w-4 h-4 mr-1.5" /> Back to Dashboard
             </Button>
-            <h1 className="font-display text-3xl font-bold text-foreground">{report.competitor_name}</h1>
+            <h1 className="text-3xl font-bold text-foreground">{report.competitor_name}</h1>
             <p className="text-sm text-muted-foreground mt-1">{report.competitor_url} • {new Date(report.created_at).toLocaleDateString()}</p>
           </div>
-          <Button variant="outline" onClick={exportPdf}>
+          <Button variant="outline" onClick={exportPdf} className="rounded-xl">
             <Download className="w-4 h-4 mr-2" /> Download PDF
           </Button>
         </div>
@@ -180,7 +180,7 @@ const Report = () => {
         {/* Report Sections */}
         <div className="space-y-5">
           <SectionCard icon={Building2} title="Company Overview" index={0}>
-            <p className="text-sm text-foreground mb-3">{a.companyOverview.description}</p>
+            <p className="text-sm text-foreground mb-4">{a.companyOverview.description}</p>
             <InfoRow label="Category" value={a.companyOverview.category} />
             <InfoRow label="Target Market" value={a.companyOverview.targetMarket} />
             <InfoRow label="Business Model" value={a.companyOverview.businessModel} />
@@ -190,8 +190,8 @@ const Report = () => {
             <InfoRow label="Company Size" value={a.icp.companySize} />
             <InfoRow label="Target Industry" value={a.icp.targetIndustry} />
             <InfoRow label="User Persona" value={a.icp.userPersona} />
-            <div className="mt-3">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Use Cases</span>
+            <div className="mt-4">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Use Cases</span>
               <div className="flex flex-wrap gap-2 mt-2">
                 {a.icp.useCases.map(uc => <Tag key={uc}>{uc}</Tag>)}
               </div>
@@ -199,19 +199,19 @@ const Report = () => {
           </SectionCard>
 
           <SectionCard icon={Package} title="Product Offering" index={2}>
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div>
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Key Features</span>
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Key Features</span>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {a.productOffering.features.map(f => <Tag key={f}>{f}</Tag>)}
                 </div>
               </div>
               <div>
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Value Propositions</span>
-                <ul className="mt-1.5 space-y-1">
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Value Propositions</span>
+                <ul className="mt-2 space-y-2">
                   {a.productOffering.valuePropositions.map(vp => (
                     <li key={vp} className="text-sm text-foreground flex items-start gap-2">
-                      <span className="text-accent mt-1">•</span> {vp}
+                      <span className="text-accent mt-0.5">•</span> {vp}
                     </li>
                   ))}
                 </ul>
@@ -224,15 +224,15 @@ const Report = () => {
             <InfoRow label="Free Plan" value={a.pricingStrategy.freePlan} />
             <InfoRow label="Enterprise" value={a.pricingStrategy.enterprise} />
             {a.pricingStrategy.tiers.length > 0 && (
-              <div className="mt-3">
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Tiers</span>
+              <div className="mt-4">
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Tiers</span>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {a.pricingStrategy.tiers.map(t => <Tag key={t}>{t}</Tag>)}
                 </div>
               </div>
             )}
             {a.pricingStrategy.note && (
-              <p className="text-xs text-muted-foreground italic mt-2">{a.pricingStrategy.note}</p>
+              <p className="text-xs text-muted-foreground italic mt-3">{a.pricingStrategy.note}</p>
             )}
           </SectionCard>
 
@@ -247,7 +247,7 @@ const Report = () => {
               <ul className="space-y-2">
                 {a.strengths.map(s => (
                   <li key={s} className="text-sm text-foreground flex items-start gap-2">
-                    <span className="text-accent mt-0.5">✓</span> {s}
+                    <span className="text-green-500 mt-0.5">✓</span> {s}
                   </li>
                 ))}
               </ul>
@@ -265,10 +265,10 @@ const Report = () => {
           </div>
 
           <SectionCard icon={Lightbulb} title="Strategic Insights" index={7}>
-            <ul className="space-y-3">
+            <ul className="space-y-4">
               {a.strategicInsights.map((insight, i) => (
                 <li key={i} className="text-sm text-foreground flex items-start gap-3">
-                  <span className="w-6 h-6 rounded-full bg-accent/10 text-accent text-xs font-semibold flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="w-7 h-7 rounded-lg bg-accent/10 text-accent text-xs font-semibold flex items-center justify-center shrink-0 mt-0.5">
                     {i + 1}
                   </span>
                   {insight}
