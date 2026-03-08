@@ -6,7 +6,7 @@ import { SpyNavbar } from "@/components/SpyNavbar";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Search, Loader2, Eye, Sparkles } from "lucide-react";
+import { Search, Loader2, Eye } from "lucide-react";
 import { motion } from "framer-motion";
 
 const Analyze = () => {
@@ -52,57 +52,45 @@ const Analyze = () => {
   if (authLoading) return null;
 
   return (
-    <div className="min-h-screen section-dark">
-      {/* Cosmic orbs */}
-      <div className="cosmic-orb cosmic-orb-blue w-[600px] h-[600px] top-[-200px] left-1/2 -translate-x-1/2 animate-glow-pulse" />
-      <div className="cosmic-orb cosmic-orb-cyan w-[350px] h-[350px] bottom-[50px] right-[-100px] animate-float" />
-      
+    <div className="min-h-screen bg-background">
       <SpyNavbar />
-      
-      <div className="container mx-auto px-4 py-20 relative z-10">
+      <div className="container mx-auto px-4 py-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-xl mx-auto"
+          className="max-w-lg mx-auto"
         >
-          <div className="text-center mb-12">
-            <div className="w-16 h-16 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-6">
-              <Eye className="w-8 h-8 text-white" />
+          <div className="text-center mb-10">
+            <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-5">
+              <Eye className="w-7 h-7 text-primary-foreground" />
             </div>
-            <h1 className="text-4xl font-bold text-white mb-4">Analyze a Competitor</h1>
-            <p className="text-white/50 text-lg">
-              Enter a SaaS website URL to generate a full competitive intelligence report
+            <h1 className="font-display text-3xl font-bold text-foreground">Analyze a Competitor</h1>
+            <p className="text-muted-foreground mt-2">
+              Enter a SaaS website URL to generate a competitive intelligence report
             </p>
           </div>
 
           <form onSubmit={handleAnalyze} className="space-y-4">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 type="url"
                 placeholder="https://competitor.com"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                className="h-14 pl-12 bg-white/5 border-white/10 text-white placeholder:text-white/40 focus-visible:ring-accent focus-visible:border-accent/50 rounded-xl text-lg"
+                className="h-12 pl-10"
                 required
                 disabled={analyzing}
               />
             </div>
-            <Button 
-              type="submit" 
-              className="w-full h-14 bg-accent hover:bg-accent/90 text-white font-semibold rounded-xl text-lg" 
-              disabled={analyzing}
-            >
+            <Button type="submit" className="w-full h-12 font-semibold" disabled={analyzing}>
               {analyzing ? (
                 <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Analyzing competitor strategy...
                 </>
               ) : (
-                <>
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  Run Analysis
-                </>
+                "Run Analysis"
               )}
             </Button>
           </form>
@@ -111,13 +99,13 @@ const Analyze = () => {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="mt-10 text-center"
+              className="mt-8 text-center"
             >
-              <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-accent/10 border border-accent/20">
-                <div className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse" />
-                <span className="text-sm text-accent font-medium">Scraping & analyzing with AI...</span>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20">
+                <div className="w-2 h-2 rounded-full bg-accent animate-pulse-glow" />
+                <span className="text-sm text-accent font-medium">Scraping & analyzing...</span>
               </div>
-              <p className="text-xs text-white/40 mt-4">This may take 15-30 seconds</p>
+              <p className="text-xs text-muted-foreground mt-3">This may take 15-30 seconds</p>
             </motion.div>
           )}
         </motion.div>

@@ -6,8 +6,7 @@ import { Label } from "@/components/ui/label";
 import { SpyNavbar } from "@/components/SpyNavbar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Eye, ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { Eye } from "lucide-react";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -33,70 +32,37 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen section-dark">
-      {/* Cosmic orbs */}
-      <div className="cosmic-orb cosmic-orb-blue w-[500px] h-[500px] top-[-150px] left-1/2 -translate-x-1/2 animate-glow-pulse" />
-      <div className="cosmic-orb cosmic-orb-cyan w-[300px] h-[300px] bottom-[100px] left-[-50px]" />
-      
+    <div className="min-h-screen bg-background">
       <SpyNavbar />
-      
-      <div className="flex items-center justify-center px-4 py-20 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md"
-        >
-          <div className="glass-card-dark rounded-2xl p-8">
-            <div className="text-center mb-8">
-              <div className="w-14 h-14 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-5">
-                <Eye className="w-7 h-7 text-white" />
-              </div>
-              <h1 className="text-2xl font-bold text-white">Create your account</h1>
-              <p className="text-white/50 text-sm mt-2">Start analyzing competitors in seconds</p>
+      <div className="flex items-center justify-center px-4 py-20">
+        <div className="w-full max-w-sm">
+          <div className="text-center mb-8">
+            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center mx-auto mb-4">
+              <Eye className="w-6 h-6 text-primary-foreground" />
             </div>
-
-            <form onSubmit={handleSignup} className="space-y-5">
-              <div>
-                <Label htmlFor="email" className="text-white/70 text-sm">Email</Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  value={email} 
-                  onChange={e => setEmail(e.target.value)} 
-                  required 
-                  className="mt-2 h-12 bg-white/5 border-white/10 text-white placeholder:text-white/30 focus-visible:ring-accent focus-visible:border-accent/50 rounded-xl"
-                  placeholder="you@company.com"
-                />
-              </div>
-              <div>
-                <Label htmlFor="password" className="text-white/70 text-sm">Password</Label>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  value={password} 
-                  onChange={e => setPassword(e.target.value)} 
-                  required 
-                  minLength={6} 
-                  className="mt-2 h-12 bg-white/5 border-white/10 text-white placeholder:text-white/30 focus-visible:ring-accent focus-visible:border-accent/50 rounded-xl"
-                  placeholder="••••••••"
-                />
-              </div>
-              <Button 
-                type="submit" 
-                className="w-full h-12 bg-accent hover:bg-accent/90 text-white font-semibold rounded-xl" 
-                disabled={loading}
-              >
-                {loading ? "Creating account..." : "Get Started"}
-                {!loading && <ArrowRight className="w-4 h-4 ml-2" />}
-              </Button>
-            </form>
-
-            <p className="text-center text-sm text-white/50 mt-6">
-              Already have an account?{" "}
-              <Link to="/login" className="text-accent hover:underline font-medium">Log in</Link>
-            </p>
+            <h1 className="font-display text-2xl font-bold text-foreground">Create your account</h1>
+            <p className="text-muted-foreground text-sm mt-1">Start analyzing competitors in seconds</p>
           </div>
-        </motion.div>
+
+          <form onSubmit={handleSignup} className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required className="mt-1" />
+            </div>
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} className="mt-1" />
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Creating account..." : "Sign up"}
+            </Button>
+          </form>
+
+          <p className="text-center text-sm text-muted-foreground mt-6">
+            Already have an account?{" "}
+            <Link to="/login" className="text-accent hover:underline font-medium">Log in</Link>
+          </p>
+        </div>
       </div>
     </div>
   );
