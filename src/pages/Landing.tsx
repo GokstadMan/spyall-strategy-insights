@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import heroImage from "@/assets/hero-illustration.png";
 import { Input } from "@/components/ui/input";
 import { SpyNavbar } from "@/components/SpyNavbar";
 import { Eye, Zap, Shield, Target, ArrowRight } from "lucide-react";
