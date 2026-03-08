@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { SpyNavbar } from "@/components/SpyNavbar";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -114,13 +115,31 @@ const Dashboard = () => {
                       </h3>
                       <p className="text-sm text-muted-foreground truncate mt-1">{report.competitor_url}</p>
                     </div>
-                    <button
-                      onClick={(e) => handleDelete(e, report.id)}
-                      className="p-1 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors shrink-0 ml-2 mt-0.5"
-                      title="Delete report"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button
+                          onClick={(e) => e.preventDefault()}
+                          className="p-1 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors shrink-0 ml-2 mt-0.5"
+                          title="Delete report"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you really sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will permanently delete the report for {report.competitor_name || report.competitor_url}. This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={(e) => handleDelete(e, report.id)}>
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                   <div className="flex items-center gap-1.5 mt-4 text-xs text-muted-foreground">
                     <Calendar className="w-3.5 h-3.5" />
