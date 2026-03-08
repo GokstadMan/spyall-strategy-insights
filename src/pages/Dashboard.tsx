@@ -121,6 +121,7 @@ const Dashboard = () => {
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
+                  </div>
                   <div className="flex items-center gap-1.5 mt-4 text-xs text-muted-foreground">
                     <Calendar className="w-3.5 h-3.5" />
                     {new Date(report.created_at).toLocaleDateString()}
