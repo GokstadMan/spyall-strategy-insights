@@ -41,6 +41,18 @@ const Dashboard = () => {
     fetchReports();
   }, [user]);
 
+  const handleDelete = async (e: React.MouseEvent, reportId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const { error } = await supabase.from("reports").delete().eq("id", reportId);
+    if (error) {
+      toast.error("Failed to delete report");
+    } else {
+      setReports((prev) => prev.filter((r) => r.id !== reportId));
+      toast.success("Report deleted");
+    }
+  };
+
   if (authLoading) return null;
 
   return (
