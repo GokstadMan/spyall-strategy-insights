@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { SpyNavbar } from "@/components/SpyNavbar";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, ExternalLink, Calendar, Globe } from "lucide-react";
+import { Plus, ExternalLink, Calendar, Globe, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { motion } from "framer-motion";
 
 type Report = {
