@@ -247,7 +247,7 @@ const Report = () => {
               <ul className="space-y-2">
                 {a.strengths.map(s => (
                   <li key={s} className="text-sm text-foreground flex items-start gap-2">
-                    <span className="text-green-500 mt-0.5">✓</span> {s}
+                    <span className="text-accent mt-0.5">✓</span> {s}
                   </li>
                 ))}
               </ul>
