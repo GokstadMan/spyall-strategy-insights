@@ -173,9 +173,14 @@ const Report = () => {
             <h1 className="font-display text-3xl font-bold text-foreground">{report.competitor_name}</h1>
             <p className="text-sm text-muted-foreground mt-1">{report.competitor_url} • {new Date(report.created_at).toLocaleDateString()}</p>
           </div>
-          <Button variant="outline" onClick={exportPdf}>
-            <Download className="w-4 h-4 mr-2" /> Download PDF
-          </Button>
+          <div className="flex items-center gap-2">
+            {user && report && (
+              <ShareReportDialog reportId={report.id} reportName={report.competitor_name} />
+            )}
+            <Button variant="outline" onClick={exportPdf}>
+              <Download className="w-4 h-4 mr-2" /> Download PDF
+            </Button>
+          </div>
         </div>
 
         {/* Report Sections */}
