@@ -114,8 +114,13 @@ const Dashboard = () => {
                       </h3>
                       <p className="text-sm text-muted-foreground truncate mt-1">{report.competitor_url}</p>
                     </div>
-                    <ExternalLink className="w-4 h-4 text-muted-foreground shrink-0 ml-2 mt-1" />
-                  </div>
+                    <button
+                      onClick={(e) => handleDelete(e, report.id)}
+                      className="p-1 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors shrink-0 ml-2 mt-0.5"
+                      title="Delete report"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   <div className="flex items-center gap-1.5 mt-4 text-xs text-muted-foreground">
                     <Calendar className="w-3.5 h-3.5" />
                     {new Date(report.created_at).toLocaleDateString()}
