@@ -14,6 +14,7 @@ type Report = {
   competitor_url: string;
   competitor_name: string;
   created_at: string;
+  isShared?: boolean;
 };
 
 const Dashboard = () => {
