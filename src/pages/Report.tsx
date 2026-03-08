@@ -72,11 +72,11 @@ const Report = () => {
   useEffect(() => {
     if (!user || !id) return;
     const fetch = async () => {
+      // Try own report first, then shared
       const { data } = await supabase
         .from("reports")
         .select("*")
         .eq("id", id)
-        .eq("user_id", user.id)
         .single();
       if (data) {
         const output = typeof data.analysis_output === "string"
