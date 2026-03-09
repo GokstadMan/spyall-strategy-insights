@@ -5,7 +5,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { SpyNavbar } from "@/components/SpyNavbar";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, ExternalLink, Calendar, Globe, Trash2, Share2 } from "lucide-react";
+import { Plus, ExternalLink, Calendar, Globe, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
@@ -21,7 +21,7 @@ const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [reports, setReports] = useState<Report[]>([]);
-  const [sharedReports, setSharedReports] = useState<Report[]>([]);
+  
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,22 +40,6 @@ const Dashboard = () => {
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       setReports(data || []);
-
-      // Fetch shared reports
-      const { data: shares } = await supabase
-        .from("report_shares")
-        .select("report_id")
-        .eq("shared_with_user_id", user.id);
-
-      if (shares && shares.length > 0) {
-        const sharedIds = shares.map(s => s.report_id);
-        const { data: sharedData } = await supabase
-          .from("reports")
-          .select("id, competitor_url, competitor_name, created_at")
-          .in("id", sharedIds)
-          .order("created_at", { ascending: false });
-        setSharedReports(sharedData || []);
-      }
 
       setLoading(false);
     };
@@ -172,41 +156,6 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* Shared with me */}
-        {!loading && sharedReports.length > 0 && (
-          <div className="mt-12">
-            <div className="flex items-center gap-2 mb-6">
-              <Share2 className="w-5 h-5 text-muted-foreground" />
-              <h2 className="font-display text-xl font-semibold text-foreground">Shared with me</h2>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {sharedReports.map((report, i) => (
-                <motion.div
-                  key={report.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                >
-                  <Link
-                    to={`/report/${report.id}`}
-                    className="block glass-card rounded-xl p-5 hover:border-accent/40 transition-colors group border-l-2 border-l-accent/30"
-                  >
-                    <div className="min-w-0">
-                      <h3 className="font-display font-semibold text-foreground truncate group-hover:text-accent transition-colors">
-                        {report.competitor_name || "Unknown"}
-                      </h3>
-                      <p className="text-sm text-muted-foreground truncate mt-1">{report.competitor_url}</p>
-                    </div>
-                    <div className="flex items-center gap-1.5 mt-4 text-xs text-muted-foreground">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {new Date(report.created_at).toLocaleDateString()}
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
