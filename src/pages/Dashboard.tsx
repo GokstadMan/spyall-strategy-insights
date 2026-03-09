@@ -41,22 +41,6 @@ const Dashboard = () => {
         .order("created_at", { ascending: false });
       setReports(data || []);
 
-      // Fetch shared reports
-      const { data: shares } = await supabase
-        .from("report_shares")
-        .select("report_id")
-        .eq("shared_with_user_id", user.id);
-
-      if (shares && shares.length > 0) {
-        const sharedIds = shares.map(s => s.report_id);
-        const { data: sharedData } = await supabase
-          .from("reports")
-          .select("id, competitor_url, competitor_name, created_at")
-          .in("id", sharedIds)
-          .order("created_at", { ascending: false });
-        setSharedReports(sharedData || []);
-      }
-
       setLoading(false);
     };
     fetchReports();
