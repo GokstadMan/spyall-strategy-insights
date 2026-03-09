@@ -293,9 +293,6 @@ const Report = () => {
             <p className="text-sm text-muted-foreground mt-1">{report.competitor_url} • {new Date(report.created_at).toLocaleDateString()}</p>
           </div>
           <div className="flex items-center gap-2">
-            {user && report && (
-              <ShareReportDialog reportId={report.id} reportName={report.competitor_name} />
-            )}
             <Button variant="outline" onClick={exportPdf}>
               <Download className="w-4 h-4 mr-2" /> Download PDF
             </Button>
