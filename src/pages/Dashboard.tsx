@@ -93,19 +93,6 @@ const Dashboard = () => {
           </Button>
         </div>
 
-        {loading ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-32 rounded-xl bg-muted animate-pulse" />
-            ))}
-          </div>
-        ) : reports.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-20"
-          >
-            <Globe className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
         {accessLoaded && (
           <motion.div
             initial={{ opacity: 0, y: -8 }}
