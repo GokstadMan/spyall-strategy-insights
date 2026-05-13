@@ -49,7 +49,7 @@ const Upgrade = () => {
             </p>
           </div>
 
-          <div className="glass-card rounded-2xl p-8 border border-accent/30">
+          <div className="glass-card rounded-2xl p-6 sm:p-8 border border-accent/30">
             <div className="flex items-baseline justify-center gap-1 mb-6">
               <span className="font-display text-5xl font-bold text-foreground">$12.99</span>
               <span className="text-muted-foreground text-sm">one-time</span>
