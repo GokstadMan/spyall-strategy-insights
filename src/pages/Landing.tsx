@@ -101,8 +101,8 @@ const Landing = () => {
       </section>
 
       {/* Features */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+      <section className="container mx-auto px-4 py-14 sm:py-20">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
           {features.map((f, i) => (
             <motion.div
               key={f.title}
