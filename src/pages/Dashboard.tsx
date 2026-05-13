@@ -5,7 +5,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { SpyNavbar } from "@/components/SpyNavbar";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, ExternalLink, Calendar, Globe, Trash2 } from "lucide-react";
+import { Plus, ExternalLink, Calendar, Globe, Trash2, Sparkles, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
@@ -21,7 +21,10 @@ const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [reports, setReports] = useState<Report[]>([]);
-  
+  const [hasPurchased, setHasPurchased] = useState(false);
+  const [reportsRemaining, setReportsRemaining] = useState<number | null>(null);
+  const [accessLoaded, setAccessLoaded] = useState(false);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,7 +46,20 @@ const Dashboard = () => {
 
       setLoading(false);
     };
+    const fetchAccess = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("check-purchase");
+        if (error) throw error;
+        setHasPurchased(!!data?.hasPurchased);
+        setReportsRemaining(data?.reportsRemaining ?? null);
+      } catch (err) {
+        console.error("Error checking access:", err);
+      } finally {
+        setAccessLoaded(true);
+      }
+    };
     fetchReports();
+    fetchAccess();
   }, [user]);
 
   const handleDelete = async (e: React.MouseEvent, reportId: string) => {
@@ -76,6 +92,49 @@ const Dashboard = () => {
             </Link>
           </Button>
         </div>
+
+        {accessLoaded && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            {hasPurchased ? (
+              <div className="flex items-center justify-between gap-4 glass-card rounded-xl px-5 py-4 border border-accent/30">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-accent/15 flex items-center justify-center">
+                    <Sparkles className="w-4 h-4 text-accent" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Unlimited access</p>
+                    <p className="text-xs text-muted-foreground">Run as many competitor reports as you want.</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 glass-card rounded-xl px-5 py-4 border border-accent/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-accent" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">
+                      {reportsRemaining === null
+                        ? "Free plan"
+                        : `${reportsRemaining} of 2 free report${reportsRemaining === 1 ? "" : "s"} remaining`}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Unlock unlimited reports for a one-time $12.99.
+                    </p>
+                  </div>
+                </div>
+                <Button asChild size="sm" variant={reportsRemaining === 0 ? "default" : "outline"}>
+                  <Link to="/upgrade">Upgrade</Link>
+                </Button>
+              </div>
+            )}
+          </motion.div>
+        )}
 
         {loading ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
