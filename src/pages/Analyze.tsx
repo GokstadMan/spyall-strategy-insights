@@ -81,17 +81,17 @@ const Analyze = () => {
   return (
     <div className="min-h-screen bg-background">
       <SpyNavbar />
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-10 sm:py-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="max-w-lg mx-auto"
         >
-          <div className="text-center mb-10">
+          <div className="text-center mb-8 sm:mb-10">
             <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-5">
               <Eye className="w-7 h-7 text-primary-foreground" />
             </div>
-            <h1 className="font-display text-3xl font-bold text-foreground">Analyze a Competitor</h1>
+            <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">Analyze a Competitor</h1>
             <p className="text-muted-foreground mt-2">
               Enter a SaaS website URL to generate a competitive intelligence report
             </p>
