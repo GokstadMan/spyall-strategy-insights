@@ -21,7 +21,10 @@ const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [reports, setReports] = useState<Report[]>([]);
-  
+  const [hasPurchased, setHasPurchased] = useState(false);
+  const [reportsRemaining, setReportsRemaining] = useState<number | null>(null);
+  const [accessLoaded, setAccessLoaded] = useState(false);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,7 +46,20 @@ const Dashboard = () => {
 
       setLoading(false);
     };
+    const fetchAccess = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("check-purchase");
+        if (error) throw error;
+        setHasPurchased(!!data?.hasPurchased);
+        setReportsRemaining(data?.reportsRemaining ?? null);
+      } catch (err) {
+        console.error("Error checking access:", err);
+      } finally {
+        setAccessLoaded(true);
+      }
+    };
     fetchReports();
+    fetchAccess();
   }, [user]);
 
   const handleDelete = async (e: React.MouseEvent, reportId: string) => {
