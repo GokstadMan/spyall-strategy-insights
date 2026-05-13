@@ -40,24 +40,24 @@ const Landing = () => {
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-accent/10 blur-[120px]" />
         </div>
 
-        <div className="container mx-auto px-4 py-24 md:py-36 relative z-10">
+        <div className="container mx-auto px-4 py-16 sm:py-24 md:py-36 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
             className="max-w-3xl mx-auto text-center"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-accent/30 bg-accent/10 mb-8">
+            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full border border-accent/30 bg-accent/10 mb-6 sm:mb-8">
               <Eye className="w-3.5 h-3.5 text-accent" />
-              <span className="text-sm font-medium text-accent">Instant Competitive Intelligence</span>
+              <span className="text-xs sm:text-sm font-medium text-accent">Instant Competitive Intelligence</span>
             </div>
 
-            <h1 className="font-display text-4xl md:text-6xl font-bold tracking-tight mb-6" style={{ color: 'hsl(0 0% 96%)' }}>
+            <h1 className="font-display text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight mb-5 sm:mb-6 leading-[1.1]" style={{ color: 'hsl(0 0% 96%)' }}>
               Paste a competitor URL.{" "}
               <span className="text-gradient-spy">Instantly reveal their strategy.</span>
             </h1>
 
-            <p className="text-lg md:text-xl mb-10" style={{ color: 'hsl(220 10% 65%)' }}>
+            <p className="text-base sm:text-lg md:text-xl mb-8 sm:mb-10 px-2 sm:px-0" style={{ color: 'hsl(220 10% 65%)' }}>
               SpyAll analyzes any SaaS website and generates a full competitive intelligence report in seconds.
             </p>
 
@@ -86,7 +86,7 @@ const Landing = () => {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="mt-16 max-w-4xl mx-auto"
+            className="mt-12 sm:mt-16 max-w-4xl mx-auto"
           >
             <div className="rounded-xl overflow-hidden border border-accent/20 shadow-[0_0_60px_-15px_hsl(var(--accent)/0.3)]">
               <img
@@ -101,8 +101,8 @@ const Landing = () => {
       </section>
 
       {/* Features */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+      <section className="container mx-auto px-4 py-14 sm:py-20">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
           {features.map((f, i) => (
             <motion.div
               key={f.title}
