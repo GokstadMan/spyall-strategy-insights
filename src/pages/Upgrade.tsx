@@ -33,17 +33,17 @@ const Upgrade = () => {
   return (
     <div className="min-h-screen bg-background">
       <SpyNavbar />
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-10 sm:py-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="max-w-md mx-auto"
         >
-          <div className="text-center mb-10">
+          <div className="text-center mb-8 sm:mb-10">
             <div className="w-14 h-14 rounded-2xl bg-accent/20 flex items-center justify-center mx-auto mb-5">
               <Zap className="w-7 h-7 text-accent" />
             </div>
-            <h1 className="font-display text-3xl font-bold text-foreground">Unlock Unlimited Access</h1>
+            <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">Unlock Unlimited Access</h1>
             <p className="text-muted-foreground mt-2">
               You've used your 2 free reports. Upgrade to keep analyzing.
             </p>
