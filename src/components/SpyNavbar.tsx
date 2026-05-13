@@ -77,8 +77,11 @@ export const SpyNavbar = () => {
                 <Menu className="w-5 h-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[80%] max-w-sm p-0 flex flex-col">
-              <div className="flex items-center gap-2 px-5 h-16 border-b border-border">
+            <SheetContent
+              side="right"
+              className="w-[80%] max-w-sm p-0 flex flex-col border-l border-primary/20 bg-[hsl(222_80%_8%)] text-[hsl(220_14%_92%)]"
+            >
+              <div className="flex items-center gap-2 px-5 h-16 border-b border-primary/20">
                 <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                   <Eye className="w-4 h-4 text-primary-foreground" />
                 </div>
@@ -93,7 +96,7 @@ export const SpyNavbar = () => {
                     <SheetClose asChild>
                       <Link
                         to="/dashboard"
-                        className="flex items-center gap-3 px-3 h-12 rounded-lg text-base font-medium text-foreground hover:bg-accent/10 transition-colors"
+                        className="flex items-center gap-3 px-3 h-12 rounded-lg text-base font-medium text-[hsl(220_14%_92%)] hover:bg-primary/15 transition-colors"
                       >
                         <LayoutDashboard className="w-5 h-5" />
                         Dashboard
@@ -102,7 +105,7 @@ export const SpyNavbar = () => {
                     <SheetClose asChild>
                       <Link
                         to="/analyze"
-                        className="flex items-center gap-3 px-3 h-12 rounded-lg text-base font-medium text-foreground hover:bg-accent/10 transition-colors"
+                        className="flex items-center gap-3 px-3 h-12 rounded-lg text-base font-medium text-[hsl(220_14%_92%)] hover:bg-primary/15 transition-colors"
                       >
                         <Plus className="w-5 h-5" />
                         New Analysis
@@ -110,7 +113,7 @@ export const SpyNavbar = () => {
                     </SheetClose>
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-3 px-3 h-12 rounded-lg text-base font-medium text-foreground hover:bg-accent/10 transition-colors text-left"
+                      className="flex items-center gap-3 px-3 h-12 rounded-lg text-base font-medium text-[hsl(220_14%_92%)] hover:bg-primary/15 transition-colors text-left"
                     >
                       <LogOut className="w-5 h-5" />
                       Logout
@@ -121,7 +124,7 @@ export const SpyNavbar = () => {
                     <SheetClose asChild>
                       <Link
                         to="/login"
-                        className="flex items-center px-3 h-12 rounded-lg text-base font-medium text-foreground hover:bg-accent/10 transition-colors"
+                        className="flex items-center px-3 h-12 rounded-lg text-base font-medium text-[hsl(220_14%_92%)] hover:bg-primary/15 transition-colors"
                       >
                         Log in
                       </Link>
