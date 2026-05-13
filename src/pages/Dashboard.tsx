@@ -79,13 +79,13 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <SpyNavbar />
-      <div className="container mx-auto px-4 py-10">
-        <div className="flex items-center justify-between mb-8">
+      <div className="container mx-auto px-4 py-6 sm:py-10">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="font-display text-3xl font-bold text-foreground">Dashboard</h1>
-            <p className="text-muted-foreground mt-1">Your competitive intelligence reports</p>
+            <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">Dashboard</h1>
+            <p className="text-sm text-muted-foreground mt-1">Your competitive intelligence reports</p>
           </div>
-          <Button asChild>
+          <Button asChild className="h-11 sm:h-10 w-full sm:w-auto">
             <Link to="/analyze">
               <Plus className="w-4 h-4 mr-2" />
               New Analysis
