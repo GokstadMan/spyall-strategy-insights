@@ -33,7 +33,7 @@ const SectionCard = ({ icon: Icon, title, children, index }: { icon: any; title:
     initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: 0.1 + index * 0.05 }}
-    className="glass-card rounded-xl p-6"
+    className="glass-card rounded-xl p-4 sm:p-6"
   >
     <div className="flex items-center gap-3 mb-4">
       <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center">
