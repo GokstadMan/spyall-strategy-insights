@@ -282,18 +282,18 @@ const Report = () => {
   return (
     <div className="min-h-screen bg-background">
       <SpyNavbar />
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-6 sm:py-8 max-w-4xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="mb-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+          <div className="min-w-0">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="mb-2 -ml-2 h-9">
               <ArrowLeft className="w-4 h-4 mr-1" /> Back
             </Button>
-            <h1 className="font-display text-3xl font-bold text-foreground">{report.competitor_name}</h1>
-            <p className="text-sm text-muted-foreground mt-1">{report.competitor_url} • {new Date(report.created_at).toLocaleDateString()}</p>
+            <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground break-words">{report.competitor_name}</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1 break-all">{report.competitor_url} • {new Date(report.created_at).toLocaleDateString()}</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={exportPdf}>
+            <Button variant="outline" onClick={exportPdf} className="w-full sm:w-auto h-11 sm:h-10">
               <Download className="w-4 h-4 mr-2" /> Download PDF
             </Button>
           </div>
