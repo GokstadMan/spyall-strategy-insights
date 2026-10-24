@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { Eye, LogOut, Plus, LayoutDashboard, Menu } from "lucide-react";
+import { LogOut, Plus, LayoutDashboard, Menu } from "lucide-react";
+import spyMark from "@/assets/spyall-mark.png";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -23,9 +24,12 @@ export const SpyNavbar = () => {
     <nav className="border-b border-border bg-card/60 backdrop-blur-md sticky top-0 z-50">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
         <Link to="/" className="flex items-center gap-2 group min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
-            <Eye className="w-4 h-4 text-primary-foreground" />
-          </div>
+          <img
+            src={spyMark}
+            alt=""
+            aria-hidden="true"
+            className="w-8 h-8 rounded-full shrink-0 object-contain ring-1 ring-primary/30"
+          />
           <span className="font-display font-bold text-xl text-foreground">
             Spy<span className="text-accent">All</span>
           </span>
@@ -82,9 +86,12 @@ export const SpyNavbar = () => {
               className="w-[80%] max-w-sm p-0 flex flex-col border-l border-primary/20 bg-[hsl(222_80%_8%)] text-[hsl(220_14%_92%)]"
             >
               <div className="flex items-center gap-2 px-5 h-16 border-b border-primary/20">
-                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                  <Eye className="w-4 h-4 text-primary-foreground" />
-                </div>
+                <img
+                  src={spyMark}
+                  alt=""
+                  aria-hidden="true"
+                  className="w-8 h-8 rounded-full shrink-0 object-contain ring-1 ring-primary/30"
+                />
                 <span className="font-display font-bold text-xl text-foreground">
                   Spy<span className="text-accent">All</span>
                 </span>
