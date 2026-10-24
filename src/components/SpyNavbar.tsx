@@ -92,7 +92,7 @@ export const SpyNavbar = () => {
                   aria-hidden="true"
                   className="w-8 h-8 rounded-full shrink-0 object-contain ring-1 ring-primary/30"
                 />
-                <span className="font-display font-bold text-xl text-foreground">
+                <span className="font-display font-bold text-xl text-[hsl(220_14%_92%)]">
                   Spy<span className="text-accent">All</span>
                 </span>
               </div>
