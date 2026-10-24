@@ -6,65 +6,66 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
+const htmlToText = (html: string, max: number) =>
+  html
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+    .replace(/<noscript[^>]*>[\s\S]*?<\/noscript>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, max);
+
+async function fetchPage(url: string, max: number): Promise<string> {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 8000);
   try {
-    const { url, userId } = await req.json();
-    if (!url || !userId) throw new Error("Missing url or userId");
+    const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; SpyAll/1.0)" }, signal: ctrl.signal, redirect: "follow" });
+    if (!r.ok) return "";
+    const ct = r.headers.get("content-type") || "";
+    if (!ct.includes("html")) return "";
+    const text = htmlToText(await r.text(), max);
+    return text.length > 200 ? text : "";
+  } catch {
+    return "";
+  } finally {
+    clearTimeout(t);
+  }
+}
 
-    // Step 1: Fetch website content
-    console.log("Fetching:", url);
-    let pageContent = "";
-    try {
-      const fetchResp = await fetch(url, {
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; SpyAll/1.0)" },
-      });
-      const html = await fetchResp.text();
-      // Extract text content from HTML (simple approach)
-      pageContent = html
-        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-        .replace(/<[^>]+>/g, " ")
-        .replace(/\s+/g, " ")
-        .trim()
-        .slice(0, 15000); // Limit to ~15k chars for AI context
-    } catch (fetchErr) {
-      console.error("Fetch error:", fetchErr);
-      pageContent = `Could not fetch the website at ${url}. Please analyze based on the URL/domain name alone.`;
-    }
+const SUBPAGES = ["pricing", "features", "integrations", "product"];
 
-    // Try to fetch pricing page too
-    let pricingContent = "";
-    try {
-      const pricingUrl = new URL("/pricing", url).href;
-      const pricingResp = await fetch(pricingUrl, {
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; SpyAll/1.0)" },
-      });
-      if (pricingResp.ok) {
-        const pricingHtml = await pricingResp.text();
-        pricingContent = pricingHtml
-          .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-          .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-          .replace(/<[^>]+>/g, " ")
-          .replace(/\s+/g, " ")
-          .trim()
-          .slice(0, 8000);
-      }
-    } catch { /* ignore */ }
+// Fetch homepage + key sub-pages in parallel (deep scan)
+async function scanSite(url: string, compact = false) {
+  const homeMax = compact ? 8000 : 12000;
+  const subMax = compact ? 3500 : 6000;
+  const [home, ...subs] = await Promise.all([
+    fetchPage(url, homeMax),
+    ...SUBPAGES.map((p) => fetchPage(new URL(`/${p}`, url).href, subMax)),
+  ]);
+  const pages: Record<string, string> = {};
+  SUBPAGES.forEach((p, i) => { if (subs[i]) pages[p] = subs[i]; });
+  // dedupe: some sites redirect sub-pages to homepage
+  for (const k of Object.keys(pages)) if (pages[k].slice(0, 300) === home.slice(0, 300)) delete pages[k];
+  return { home, pages, scanned: ["home", ...Object.keys(pages)] };
+}
 
-    // Extract domain name for competitor name
-    const domain = new URL(url).hostname.replace("www.", "");
-    const companyName = domain.split(".")[0].charAt(0).toUpperCase() + domain.split(".")[0].slice(1);
+const formatScan = (label: string, url: string, s: Awaited<ReturnType<typeof scanSite>>) => {
+  let out = `##### ${label} (${url}) #####\n=== HOMEPAGE ===\n${s.home || "Could not fetch homepage; infer from domain."}\n`;
+  for (const [k, v] of Object.entries(s.pages)) out += `\n=== /${k.toUpperCase()} PAGE ===\n${v}\n`;
+  return out;
+};
 
-    // Step 2: AI analysis
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+const nameFromUrl = (url: string) => {
+  const d = new URL(url).hostname.replace(/^www\./, "").split(".")[0];
+  return d.charAt(0).toUpperCase() + d.slice(1);
+};
 
-    const systemPrompt = `You are SpyAll, an AI competitive intelligence analyst. Analyze the provided website content and generate a structured competitive intelligence report. Be professional, analytical, and concise. Clearly label when you are inferring vs extracting directly from content. Avoid hallucinating specific numbers unless they are visible in the content.
-
-You MUST respond with a valid JSON object (no markdown, no code blocks) with this exact structure:
-{
+const SINGLE_SCHEMA = `{
   "companyOverview": { "description": "string", "category": "string", "targetMarket": "string", "businessModel": "string" },
   "icp": { "companySize": "string", "targetIndustry": "string", "userPersona": "string", "useCases": ["string"] },
   "productOffering": { "features": ["string"], "modules": ["string"], "valuePropositions": ["string"] },
@@ -72,96 +73,106 @@ You MUST respond with a valid JSON object (no markdown, no code blocks) with thi
   "messaging": { "headline": "string", "valueProposition": "string", "positioning": "string" },
   "strengths": ["string"],
   "weaknesses": ["string"],
-  "strategicInsights": ["string"]
+  "strategicInsights": ["string"],
+  "deepScan": { "pricingLimits": ["usage limits, seat caps, quotas per tier"], "hiddenCosts": ["add-ons, overage fees, annual-only discounts, paywalled features"], "integrations": ["string"], "featureHighlights": ["string"] },
+  "battlecard": {
+    "howToWin": ["string"],
+    "objections": [{ "objection": "what a prospect might say in favour of this competitor", "response": "how a sales rep should reply" }],
+    "landmines": ["questions to plant that expose this competitor's weaknesses"],
+    "talkingPoints": ["short punchy lines for a sales call"]
+  }
 }`;
 
-    const userPrompt = `Analyze this competitor website and generate the competitive intelligence report.
+const COMPARE_SCHEMA = `{
+  "type": "comparison",
+  "a": { "name": "string", "url": "string", "summary": "string", "category": "string", "targetAudience": "string", "pricingModel": "string", "pricingTiers": ["string"], "freePlan": "string", "strengths": ["string"], "weaknesses": ["string"] },
+  "b": { same shape as a },
+  "pricingGap": "string - direct comparison of pricing",
+  "audienceDivergence": "string - how their target audiences differ",
+  "featureGaps": [{ "feature": "string", "a": "string (Yes/No/Partial/details)", "b": "string" }],
+  "advantagesA": ["competitive advantages A has over B"],
+  "advantagesB": ["competitive advantages B has over A"],
+  "positioningContrast": "string",
+  "verdict": "string - who is likely to win which segment and why",
+  "opportunities": ["gaps in the market neither covers well"]
+}`;
 
-Website URL: ${url}
-Company Name: ${companyName}
+async function callAI(system: string, user: string) {
+  const key = Deno.env.get("LOVABLE_API_KEY");
+  if (!key) throw new Error("LOVABLE_API_KEY not configured");
+  const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [{ role: "system", content: system }, { role: "user", content: user }],
+      response_format: { type: "json_object" },
+    }),
+  });
+  if (!r.ok) {
+    const t = await r.text();
+    console.error("AI error:", r.status, t);
+    if (r.status === 429) throw Object.assign(new Error("Rate limit exceeded. Please try again in a moment."), { status: 429 });
+    if (r.status === 402) throw Object.assign(new Error("AI credits exhausted. Please add credits."), { status: 402 });
+    throw new Error(`AI gateway error: ${r.status}`);
+  }
+  const d = await r.json();
+  const text = (d.choices?.[0]?.message?.content || "").replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+  try { return JSON.parse(text); } catch {
+    console.error("Bad AI JSON:", text.slice(0, 500));
+    throw new Error("AI returned invalid JSON. Please try again.");
+  }
+}
 
-=== HOMEPAGE CONTENT ===
-${pageContent}
+const BASE = `You are SpyAll, an AI competitive intelligence analyst for SaaS companies. Be professional, analytical and concise. Prefix inferred statements with "(Inferred)" when they are not directly visible in the content. Never invent specific prices or numbers that are not in the content. Respond ONLY with a valid JSON object, no markdown.`;
 
-${pricingContent ? `=== PRICING PAGE CONTENT ===\n${pricingContent}` : "No pricing page found - infer pricing strategy."}`;
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-    console.log("Calling AI for analysis...");
+  try {
+    const body = await req.json();
+    const { url, url2, userId, mode } = body ?? {};
+    if (!url || !userId) return json({ error: "Missing url or userId" }, 400);
+    try { new URL(url); if (url2) new URL(url2); } catch { return json({ error: "Invalid URL" }, 400); }
 
-    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-      }),
-    });
+    let output: unknown;
+    let competitorName: string;
+    let competitorUrl: string;
 
-    if (!aiResp.ok) {
-      const errText = await aiResp.text();
-      console.error("AI error:", aiResp.status, errText);
-      if (aiResp.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (aiResp.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      throw new Error(`AI gateway error: ${aiResp.status}`);
+    if (mode === "compare") {
+      if (!url2) return json({ error: "Two URLs are required for Battle Mode" }, 400);
+      const [sa, sb] = await Promise.all([scanSite(url, true), scanSite(url2, true)]);
+      const nameA = nameFromUrl(url), nameB = nameFromUrl(url2);
+      output = await callAI(
+        `${BASE}\nCompare two companies head-to-head (gap analysis). Use exactly this JSON structure:\n${COMPARE_SCHEMA}`,
+        `Compare A = ${nameA} and B = ${nameB}. Include 6-10 featureGaps rows.\n\n${formatScan("A: " + nameA, url, sa)}\n\n${formatScan("B: " + nameB, url2, sb)}`,
+      );
+      (output as any).type = "comparison";
+      (output as any).pagesScanned = { a: sa.scanned, b: sb.scanned };
+      competitorName = `${nameA} vs ${nameB}`;
+      competitorUrl = `${url} | ${url2}`;
+    } else {
+      const s = await scanSite(url);
+      competitorName = nameFromUrl(url);
+      competitorUrl = url;
+      output = await callAI(
+        `${BASE}\nGenerate a competitive intelligence report plus a sales battlecard (for reps selling AGAINST this company). Use exactly this JSON structure:\n${SINGLE_SCHEMA}`,
+        `Company: ${competitorName}\nPages scanned: ${s.scanned.join(", ")}${s.pages.pricing ? "" : "\nNo pricing page found - infer pricing strategy and label it."}\n\n${formatScan(competitorName, url, s)}`,
+      );
+      (output as any).deepScan = { ...((output as any).deepScan || {}), pagesScanned: s.scanned };
     }
 
-    const aiData = await aiResp.json();
-    let analysisText = aiData.choices?.[0]?.message?.content || "";
-    
-    // Clean potential markdown wrapping
-    analysisText = analysisText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-    
-    let analysisOutput;
-    try {
-      analysisOutput = JSON.parse(analysisText);
-    } catch {
-      console.error("Failed to parse AI output:", analysisText.slice(0, 500));
-      throw new Error("AI returned invalid JSON. Please try again.");
-    }
-
-    // Step 3: Save to database
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    const { data: report, error: dbError } = await supabase
+    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const { data: report, error } = await supabase
       .from("reports")
-      .insert({
-        user_id: userId,
-        competitor_url: url,
-        competitor_name: companyName,
-        analysis_output: analysisOutput,
-      })
+      .insert({ user_id: userId, competitor_url: competitorUrl, competitor_name: competitorName, analysis_output: output })
       .select("id")
       .single();
+    if (error) { console.error("DB error:", error); throw new Error("Failed to save report"); }
 
-    if (dbError) {
-      console.error("DB error:", dbError);
-      throw new Error("Failed to save report");
-    }
-
-    console.log("Report saved:", report.id);
-
-    return new Response(JSON.stringify({ reportId: report.id }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (e) {
+    return json({ reportId: report.id });
+  } catch (e: any) {
     console.error("analyze-competitor error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json({ error: e?.message || "Unknown error" }, e?.status || 500);
   }
 });

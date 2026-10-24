@@ -8,6 +8,9 @@ import { Download, ArrowLeft, Building2, Target, Package, DollarSign, MessageSqu
 
 import { motion } from "framer-motion";
 import jsPDF from "jspdf";
+import { ComparisonView, type Comparison } from "@/components/ComparisonView";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScanSearch, Swords, ShieldAlert, Bomb, Mic } from "lucide-react";
 
 type AnalysisOutput = {
   companyOverview: { description: string; category: string; targetMarket: string; businessModel: string };
@@ -18,6 +21,8 @@ type AnalysisOutput = {
   strengths: string[];
   weaknesses: string[];
   strategicInsights: string[];
+  deepScan?: { pagesScanned?: string[]; pricingLimits?: string[]; hiddenCosts?: string[]; integrations?: string[]; featureHighlights?: string[] };
+  battlecard?: { howToWin?: string[]; objections?: { objection: string; response: string }[]; landmines?: string[]; talkingPoints?: string[] };
 };
 
 type ReportData = {
@@ -252,6 +257,23 @@ const Report = () => {
     drawSectionHeader("Strategic Insights");
     a.strategicInsights.forEach((s, i) => addBullet(s, `${i + 1}.`));
 
+    const ds = a.deepScan;
+    if (ds && (ds.pricingLimits?.length || ds.hiddenCosts?.length || ds.integrations?.length)) {
+      drawSectionHeader("Deep Scan: Pricing & Features");
+      if (ds.pagesScanned?.length) addInfoRow("Pages Scanned", ds.pagesScanned.map(p => p === "home" ? "Homepage" : `/${p}`).join(", "));
+      if (ds.pricingLimits?.length) { addLabel("Plan Limits"); ds.pricingLimits.forEach(x => addBullet(x)); }
+      if (ds.hiddenCosts?.length) { addLabel("Hidden Costs"); ds.hiddenCosts.forEach(x => addBullet(x)); }
+      if (ds.integrations?.length) { addLabel("Integrations"); addTags(ds.integrations); }
+    }
+    const bc = a.battlecard;
+    if (bc) {
+      drawSectionHeader(`Sales Battlecard: Selling Against ${report.competitor_name}`);
+      if (bc.howToWin?.length) { addLabel("How to Win"); bc.howToWin.forEach(x => addBullet(x, "→")); }
+      if (bc.objections?.length) { addLabel("Objection Handling"); bc.objections.forEach(o => { addValue(`"${o.objection}"`); addBullet(o.response, "→"); }); }
+      if (bc.landmines?.length) { addLabel("Landmines to Plant"); bc.landmines.forEach(x => addBullet(x)); }
+      if (bc.talkingPoints?.length) { addLabel("Quick Talking Points"); bc.talkingPoints.forEach(x => addBullet(x)); }
+    }
+
     doc.save(`SpyAll-${report.competitor_name}.pdf`);
   };
 
@@ -277,7 +299,23 @@ const Report = () => {
     );
   }
 
+  if ((report.analysis_output as any)?.type === "comparison") {
+    return (
+      <div className="min-h-screen bg-background">
+        <SpyNavbar />
+        <ComparisonView c={report.analysis_output as unknown as Comparison} name={report.competitor_name} createdAt={report.created_at} />
+      </div>
+    );
+  }
+
   const a = report.analysis_output;
+  const ds = a.deepScan;
+  const bc = a.battlecard;
+  const List = ({ items, sym = "•" }: { items?: string[]; sym?: string }) => (
+    <ul className="space-y-2">{(items || []).map((x, i) => (
+      <li key={i} className="text-sm text-foreground flex items-start gap-2"><span className="text-accent mt-0.5">{sym}</span> {x}</li>
+    ))}</ul>
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -299,6 +337,33 @@ const Report = () => {
           </div>
         </div>
 
+        <Tabs defaultValue="report">
+        <TabsList className="mb-5 w-full sm:w-auto">
+          <TabsTrigger value="report" className="flex-1 sm:flex-none">Intelligence Report</TabsTrigger>
+          <TabsTrigger value="battlecard" className="flex-1 sm:flex-none"><Swords className="w-4 h-4 mr-1.5" /> Sales Battlecard</TabsTrigger>
+        </TabsList>
+        <TabsContent value="battlecard" className="space-y-5">
+          {!bc ? (
+            <div className="glass-card rounded-xl p-6 text-center text-sm text-muted-foreground">
+              This report was created before battlecards existed. Run a new analysis to get one.
+            </div>
+          ) : (<>
+            <SectionCard icon={Swords} title={`How to win against ${report.competitor_name}`} index={0}><List items={bc.howToWin} sym="→" /></SectionCard>
+            <SectionCard icon={ShieldAlert} title="Objection Handling" index={1}>
+              <div className="space-y-4">{(bc.objections || []).map((o, i) => (
+                <div key={i} className="border-l-2 border-accent pl-3">
+                  <p className="text-sm font-medium text-foreground">"{o.objection}"</p>
+                  <p className="text-sm text-muted-foreground mt-1">→ {o.response}</p>
+                </div>
+              ))}</div>
+            </SectionCard>
+            <div className="grid md:grid-cols-2 gap-5">
+              <SectionCard icon={Bomb} title="Landmines to Plant" index={2}><List items={bc.landmines} /></SectionCard>
+              <SectionCard icon={Mic} title="Quick Talking Points" index={3}><List items={bc.talkingPoints} /></SectionCard>
+            </div>
+          </>)}
+        </TabsContent>
+        <TabsContent value="report">
         {/* Report Sections */}
         <div className="space-y-5">
           <SectionCard icon={Building2} title="Company Overview" index={0}>
@@ -398,7 +463,25 @@ const Report = () => {
               ))}
             </ul>
           </SectionCard>
+
+          {ds && (ds.pricingLimits?.length || ds.hiddenCosts?.length || ds.integrations?.length) ? (
+            <SectionCard icon={ScanSearch} title="Deep Scan: Pricing & Features" index={8}>
+              {ds.pagesScanned?.length ? (
+                <div className="flex flex-wrap gap-2 mb-4">{ds.pagesScanned.map(p => <Tag key={p}>{p === "home" ? "Homepage" : `/${p}`}</Tag>)}</div>
+              ) : null}
+              <div className="grid md:grid-cols-2 gap-5">
+                {ds.pricingLimits?.length ? <div><span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Plan Limits</span><div className="mt-2"><List items={ds.pricingLimits} /></div></div> : null}
+                {ds.hiddenCosts?.length ? <div><span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Hidden Costs</span><div className="mt-2"><List items={ds.hiddenCosts} sym="!" /></div></div> : null}
+              </div>
+              {ds.integrations?.length ? (
+                <div className="mt-4"><span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Integrations</span>
+                  <div className="flex flex-wrap gap-2 mt-2">{ds.integrations.map(x => <Tag key={x}>{x}</Tag>)}</div></div>
+              ) : null}
+            </SectionCard>
+          ) : null}
         </div>
+        </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
