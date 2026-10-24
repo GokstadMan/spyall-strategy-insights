@@ -6,7 +6,7 @@ import { SpyNavbar } from "@/components/SpyNavbar";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Search, Loader2, Eye, Lock } from "lucide-react";
+import { Search, Loader2, Eye, Lock, Swords } from "lucide-react";
 import { motion } from "framer-motion";
 
 const Analyze = () => {
@@ -14,6 +14,8 @@ const Analyze = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [url, setUrl] = useState(searchParams.get("url") || "");
+  const [url2, setUrl2] = useState("");
+  const [mode, setMode] = useState<"single" | "compare">(searchParams.get("mode") === "compare" ? "compare" : "single");
   const [analyzing, setAnalyzing] = useState(false);
   const [canAnalyze, setCanAnalyze] = useState(true);
   const [reportsRemaining, setReportsRemaining] = useState<number | null>(null);
@@ -51,16 +53,18 @@ const Analyze = () => {
       return;
     }
 
-    let finalUrl = url.trim();
-    if (!finalUrl.startsWith("http://") && !finalUrl.startsWith("https://")) {
-      finalUrl = `https://${finalUrl}`;
-    }
+    const norm = (u: string) => {
+      const t = u.trim();
+      return t.startsWith("http://") || t.startsWith("https://") ? t : `https://${t}`;
+    };
+    const finalUrl = norm(url);
+    if (mode === "compare" && !url2.trim()) { toast.error("Enter a second URL"); return; }
 
     setAnalyzing(true);
 
     try {
       const { data, error } = await supabase.functions.invoke("analyze-competitor", {
-        body: { url: finalUrl, userId: user.id },
+        body: mode === "compare" ? { url: finalUrl, url2: norm(url2), userId: user.id, mode } : { url: finalUrl, userId: user.id },
       });
 
       if (error) throw error;
@@ -106,6 +110,14 @@ const Analyze = () => {
 
           {canAnalyze ? (
             <form onSubmit={handleAnalyze} className="space-y-4">
+              <div className="grid grid-cols-2 gap-1 p-1 rounded-lg bg-secondary">
+                {(["single", "compare"] as const).map((m) => (
+                  <button key={m} type="button" onClick={() => setMode(m)} disabled={analyzing}
+                    className={`h-10 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-colors ${mode === m ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
+                    {m === "single" ? <><Eye className="w-4 h-4" /> Single Report</> : <><Swords className="w-4 h-4" /> Battle Mode</>}
+                  </button>
+                ))}
+              </div>
               <div className="relative">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -118,14 +130,24 @@ const Analyze = () => {
                   disabled={analyzing}
                 />
               </div>
+              {mode === "compare" && (
+                <div className="relative">
+                  <Swords className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input type="url" placeholder="https://second-company.com" value={url2}
+                    onChange={(e) => setUrl2(e.target.value)} className="h-12 pl-10" required disabled={analyzing} />
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground text-center">
+                Deep scan includes homepage, /pricing, /features, /integrations and /product
+              </p>
               <Button type="submit" className="w-full h-12 font-semibold" disabled={analyzing}>
                 {analyzing ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Analyzing competitor strategy...
+                    {mode === "compare" ? "Running head-to-head analysis..." : "Analyzing competitor strategy..."}
                   </>
                 ) : (
-                  "Run Analysis"
+                  mode === "compare" ? "Run Battle Analysis" : "Run Analysis"
                 )}
               </Button>
             </form>
@@ -154,7 +176,7 @@ const Analyze = () => {
                 <div className="w-2 h-2 rounded-full bg-accent animate-pulse-glow" />
                 <span className="text-sm text-accent font-medium">Scraping & analyzing...</span>
               </div>
-              <p className="text-xs text-muted-foreground mt-3">This may take 15-30 seconds</p>
+              <p className="text-xs text-muted-foreground mt-3">{mode === "compare" ? "This may take 30-60 seconds" : "This may take 20-40 seconds"}</p>
             </motion.div>
           )}
         </motion.div>
